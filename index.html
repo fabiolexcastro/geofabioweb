@@ -416,6 +416,89 @@
     text-underline-offset: 3px;
   }
 
+  /* ---------- Cursos Udemy ---------- */
+  .udemy-banner{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 22px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    margin-bottom: 34px;
+  }
+  .udemy-stats{
+    display:flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .udemy-stats div span{
+    display:block;
+    font-family: var(--serif);
+    font-weight:700;
+    font-size: 1.3rem;
+    color: var(--primary-dark);
+  }
+  .udemy-stats div small{
+    display:block;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color: var(--ink-soft);
+    margin-top:2px;
+  }
+  .icon-udemy{ width:15px; height:15px; flex:none; opacity:0.75; }
+
+  .course-list{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+  .course-card{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    text-decoration:none;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px 22px;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .course-card:hover{ border-color: var(--secondary); transform: translateY(-3px); }
+  .course-card:hover .course-link{ color: var(--secondary); }
+  .course-tag{
+    font-family: var(--mono);
+    font-size: 0.64rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color: var(--accent);
+  }
+  .course-card h3{
+    font-family: var(--serif);
+    font-weight:600;
+    font-size: 1.08rem;
+    margin:0;
+    line-height:1.32;
+  }
+  .course-card p{
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    margin:0;
+    flex-grow:1;
+  }
+  .course-link{
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    transition: color .15s ease;
+  }
+
   /* ---------- Capacidades ---------- */
   .cap-grid{
     display:grid;
@@ -640,7 +723,7 @@
 
   /* ---------- Responsive ---------- */
   @media (max-width: 880px){
-    .about-grid, .cap-grid, .tools-grid, .formacion-grid, .collab-steps{
+    .about-grid, .cap-grid, .tools-grid, .formacion-grid, .collab-steps, .course-list{
       grid-template-columns: 1fr;
     }
     .capacitacion-box{ grid-template-columns: 1fr; text-align:center; }
@@ -649,6 +732,7 @@
     .hero-stats{ grid-template-columns: repeat(3,1fr); gap: 16px; }
     .pub-item{ grid-template-columns: 1fr; gap: 6px; }
     .scholar-banner{ flex-direction: column; align-items: flex-start; }
+    .udemy-banner{ flex-direction: column; align-items: flex-start; }
   }
   @media (max-width: 720px){
     nav.toc{
@@ -704,6 +788,7 @@
       <a href="#herramientas">Herramientas</a>
       <a href="#proyectos">Proyectos</a>
       <a href="#formacion">Formación</a>
+      <a href="#cursos">Cursos</a>
       <a href="#colaborar">Colaboremos</a>
       <a href="#contacto">Contacto</a>
     </nav>
@@ -935,6 +1020,51 @@
         <div class="formacion-item"><span class="dot"></span><p><b>Análisis climático</b> — downscaling, índices climáticos extremos y variabilidad/cambio climático.</p></div>
         <div class="formacion-item"><span class="dot"></span><p><b>Estadística espacial avanzada</b> — autocorrelación espacial (Moran-LISA), Regresión Geográficamente Ponderada (GWR), Kernel Density Estimation.</p></div>
         <div class="formacion-item"><span class="dot"></span><p><b>Análisis territorial</b> — métricas del paisaje, interpolación espacial (kriging, cokriging, IDW) y monitoreo de coberturas/deforestación.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CURSOS EN UDEMY -->
+  <section id="cursos">
+    <div class="wrap">
+      <span class="eyebrow">Formación en línea</span>
+      <h2 class="section-title">Cursos en Udemy</h2>
+      <p class="section-intro">Tres cursos en español sobre R aplicado a sistemas de información geográfica, análisis climático y modelado de especies — pensados para quienes parten desde cero.</p>
+
+      <div class="udemy-banner">
+        <div class="udemy-stats">
+          <div><span>1000+</span><small>Estudiantes</small></div>
+          <div><span>250+</span><small>Reseñas</small></div>
+          <div><span>4.5 ★</span><small>Calificación</small></div>
+        </div>
+        <a class="btn btn-primary" href="https://www.udemy.com/user/fabio-alexander-castro-llanos/" target="_blank" rel="noopener">
+          <svg class="icon-udemy" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M8 7.5v6.3a4 4 0 0 0 8 0V7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          Ver perfil en Udemy →
+        </a>
+      </div>
+
+      <div class="course-list">
+        <a class="course-card" href="https://www.udemy.com/course/introduccion-a-los-sig-con-r/" target="_blank" rel="noopener">
+          <span class="course-tag">R · SIG</span>
+          <h3>Introducción a los SIG con R</h3>
+          <p>Fundamentos de R aplicados al manejo, análisis y visualización de información espacial, desde cero.</p>
+          <span class="course-link">Ver curso →</span>
+        </a>
+        <a class="course-card" href="https://www.udemy.com/course/analisis-de-datos-climaticos-con-r/" target="_blank" rel="noopener">
+          <span class="course-tag">R · Clima</span>
+          <h3>Análisis de datos climáticos con R</h3>
+          <p>Descarga, procesamiento y análisis espacial de datos climáticos históricos y de proyecciones futuras.</p>
+          <span class="course-link">Ver curso →</span>
+        </a>
+        <a class="course-card" href="https://www.udemy.com/course/analisis-espacial-modelos-de-distribucion-de-especies-en-r/" target="_blank" rel="noopener">
+          <span class="course-tag">R · SDM</span>
+          <h3>Análisis espacial · Modelos de Distribución de Especies en R</h3>
+          <p>Modelado de nichos climáticos de flora y fauna con Random Forest, MaxEnt y otros algoritmos.</p>
+          <span class="course-link">Ver curso →</span>
+        </a>
       </div>
     </div>
   </section>
