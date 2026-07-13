@@ -3,1166 +3,702 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fabio Castro · Geógrafo & Científico de Datos Espaciales</title>
-<meta name="description" content="Ciencia de datos espaciales, modelos de distribución espacial, cartografía y análisis agroclimático para la toma de decisiones frente al cambio climático.">
+<title>Fabio Castro-Llanos | Analista SIG & Geógrafo</title>
+<meta name="description" content="Analista SIG y geógrafo en Cali, Colombia. Modelos de distribución espacial, análisis agroclimático y cartografía para entender cómo el clima mueve el territorio.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg: #f3efe2;
-    --bg-panel: #ece5d2;
-    --ink: #1e2a22;
-    --ink-soft: #4a5348;
-    --primary: #2f5233;     /* verde vegetación */
-    --primary-dark: #203a25;
-    --secondary: #b5541f;   /* terracota / suelo */
-    --accent: #3e6e8e;      /* azul contorno / agua-clima */
-    --line: #c9bfa0;
-    --line-soft: #ddd5bd;
-    --paper-shadow: rgba(30,42,34,0.08);
-    --radius: 2px;
-    --serif: "Fraunces", Georgia, serif;
-    --sans: "Public Sans", -apple-system, Helvetica, Arial, sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  :root {
+    /* Paleta cartográfica: papel frío, tinta pino, arcilla de elevación */
+    --paper:      #edf0ea;   /* papel topográfico frío */
+    --paper-2:    #f6f8f3;   /* superficie de tarjeta */
+    --ink:        #16241d;   /* tinta oscura verde-negra */
+    --pine:       #1f5c46;   /* verde marca (contornos, enlaces) */
+    --pine-deep:  #123528;   /* secciones oscuras */
+    --clay:       #bf6b3e;   /* acento de "alta elevación", muy medido */
+    --clay-soft:  #e7d3c4;
+    --muted:      #556a5d;   /* texto secundario verde-gris */
+    --line:       #d3dacd;   /* líneas fino papel */
+    --pine-tint:  #d9e6de;
+
+    --radius: 4px;
+    --font-display: 'Space Grotesk', -apple-system, sans-serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
   }
 
-  *{ box-sizing: border-box; }
-  html{ scroll-behavior: smooth; }
-  body{
-    margin:0;
-    background: var(--bg);
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background-color: var(--paper);
     color: var(--ink);
-    font-family: var(--sans);
-    line-height: 1.6;
+    font-family: var(--font-body);
+    line-height: 1.7;
     -webkit-font-smoothing: antialiased;
-  }
-  img,svg{ max-width:100%; display:block; }
-  a{ color: inherit; }
-  ::selection{ background: var(--secondary); color: #fff; }
-
-  .wrap{
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 0 32px;
+    overflow-x: hidden;
   }
 
-  /* ---------- Contour texture background ---------- */
-  .contours{
+  /* ---- Fondo de curvas de nivel (firma cartográfica) ---- */
+  .contours {
     position: fixed;
     inset: 0;
-    z-index: -1;
-    opacity: 0.35;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
     pointer-events: none;
+    opacity: 0.55;
   }
+  .contours path { fill: none; stroke: var(--pine); stroke-width: 1; }
 
-  /* ---------- Top bar / logo ---------- */
-  .topbar{
-    position: sticky;
-    top:0;
-    z-index: 40;
-    background: rgba(243,239,226,0.92);
-    backdrop-filter: blur(6px);
-    border-bottom: 1px solid var(--line);
-  }
-  .topbar-inner{
-    display:flex;
-    align-items:center;
-    justify-content: space-between;
-    padding: 14px 32px;
-    max-width: 1120px;
-    margin: 0 auto;
-    gap: 20px;
-  }
-  .brand{
-    display:flex;
-    align-items:center;
-    gap: 12px;
-    font-family: var(--serif);
-    font-weight: 700;
-    font-size: 1.15rem;
-    letter-spacing: 0.01em;
-    text-decoration:none;
-    color: var(--ink);
-    white-space: nowrap;
-  }
-  .brand-mark{ width: 36px; height:36px; flex:none; }
-  .brand small{
-    display:block;
-    font-family: var(--mono);
-    font-weight: 400;
-    font-size: 0.62rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-top: 2px;
-  }
+  img, svg { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+  ::selection { background: var(--pine-tint); color: var(--pine-deep); }
+  :focus-visible { outline: 2px solid var(--clay); outline-offset: 3px; border-radius: 2px; }
 
-  nav.toc{
-    display:flex;
-    gap: 22px;
-    flex-wrap: wrap;
-    justify-content:flex-end;
-  }
-  nav.toc a{
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--ink-soft);
-    padding: 6px 2px;
-    border-bottom: 2px solid transparent;
-    transition: color .15s ease, border-color .15s ease;
-  }
-  nav.toc a:hover, nav.toc a.active{
-    color: var(--primary-dark);
-    border-color: var(--secondary);
-  }
-  .toc-toggle{
-    display:none;
-    background:none;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 8px 10px;
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    cursor:pointer;
-    color: var(--ink);
-  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
 
-  /* ---------- Hero ---------- */
-  .hero{
-    padding: 92px 0 76px;
-    position: relative;
-    overflow:hidden;
-  }
-  .coord-tag{
-    font-family: var(--mono);
+  /* Etiqueta tipo margen de mapa */
+  .eyebrow {
+    font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--accent);
-    display:flex;
-    align-items:center;
-    gap: 10px;
-    margin-bottom: 22px;
-  }
-  .coord-tag::before{
-    content:"";
-    width: 26px; height:1px;
-    background: var(--secondary);
-    display:inline-block;
-  }
-  .hero h1{
-    font-family: var(--serif);
-    font-weight: 600;
-    font-size: clamp(2.3rem, 5vw, 3.6rem);
-    line-height: 1.08;
-    letter-spacing: -0.01em;
-    margin: 0 0 22px;
-    max-width: 15ch;
-    color: var(--ink);
-  }
-  .hero h1 em{
-    font-style: italic;
-    color: var(--primary);
-  }
-  .hero-sub{
-    font-size: 1.08rem;
-    color: var(--ink-soft);
-    max-width: 56ch;
-    margin: 0 0 34px;
-  }
-  .hero-cta{
-    display:flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-bottom: 46px;
-  }
-  .btn{
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    text-decoration:none;
-    padding: 13px 22px;
-    border-radius: var(--radius);
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    border: 1px solid transparent;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .btn:hover{ transform: translateY(-2px); }
-  .btn-primary{
-    background: var(--primary);
-    color: #fbf8ee;
-    box-shadow: 3px 3px 0 var(--secondary);
-  }
-  .btn-primary:hover{ box-shadow: 5px 5px 0 var(--secondary); }
-  .btn-ghost{
-    background: transparent;
-    color: var(--ink);
-    border-color: var(--line);
-  }
-  .btn-ghost:hover{ border-color: var(--accent); color: var(--accent); }
-  .icon-whatsapp{ width: 20px; height: 20px; flex: none; }
-
-  .hero-stats{
-    display:grid;
-    grid-template-columns: repeat(3,auto);
-    gap: 34px;
-    border-top: 1px solid var(--line);
-    padding-top: 22px;
-    max-width: 640px;
-  }
-  .hero-stats div span{
-    display:block;
-    font-family: var(--serif);
-    font-size: 1.7rem;
-    color: var(--primary-dark);
-    font-weight: 600;
-  }
-  .hero-stats div small{
-    font-family: var(--mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-  }
-
-  /* ---------- Section shell ---------- */
-  section{ padding: 78px 0; border-top: 1px solid var(--line-soft); }
-  section:first-of-type{ border-top:none; }
-
-  .eyebrow{
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--secondary);
-    display:block;
-    margin-bottom: 14px;
-  }
-  h2.section-title{
-    font-family: var(--serif);
-    font-weight: 600;
-    font-size: clamp(1.6rem, 3.4vw, 2.3rem);
-    margin: 0 0 20px;
-    letter-spacing: -0.01em;
-  }
-  .section-intro{
-    color: var(--ink-soft);
-    max-width: 68ch;
-    font-size: 1.02rem;
-    margin-bottom: 42px;
-  }
-
-  /* ---------- About ---------- */
-  .about-grid{
-    display:grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 56px;
-    align-items: start;
-  }
-  .about-grid p{ margin: 0 0 18px; color: var(--ink-soft); }
-  .profile-photo{
-    position: relative;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--line);
-    margin-bottom: 22px;
-    box-shadow: 4px 4px 0 var(--secondary);
-  }
-  .profile-photo img{
-    width: 100%;
-    height: 280px;
-    object-fit: cover;
-    display:block;
-    filter: saturate(0.96) contrast(1.02);
-  }
-  .profile-photo figcaption{
-    font-family: var(--mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    background: var(--bg-panel);
-    padding: 8px 12px;
-    border-top: 1px solid var(--line);
-  }
-  .credential-card{
-    background: var(--bg-panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 26px 24px;
-  }
-  .credential-card h3{
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
+    color: var(--pine);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     margin: 0 0 16px;
   }
-  .credential-card ul{ list-style:none; margin:0; padding:0; }
-  .credential-card li{
-    padding: 12px 0;
-    border-top: 1px solid var(--line);
-    display:flex;
-    flex-direction:column;
-    gap: 2px;
-  }
-  .credential-card li:first-child{ border-top:none; }
-  .credential-card li b{ font-family: var(--serif); font-size: 1rem; font-weight:600; }
-  .credential-card li span{ font-size: 0.86rem; color: var(--ink-soft); }
-
-  .highlight-strip{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 18px;
-    padding-top: 18px;
-    border-top: 1px dashed var(--line);
-  }
-  .highlight-item{
-    text-decoration:none;
-    color: var(--ink);
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 12px 10px;
-    text-align:center;
-    transition: border-color .15s ease, transform .15s ease;
-  }
-  a.highlight-item:hover{ border-color: var(--secondary); transform: translateY(-2px); }
-  .highlight-item span{
-    display:block;
-    font-family: var(--serif);
-    font-weight: 700;
-    font-size: 1.15rem;
-    color: var(--primary-dark);
-  }
-  .highlight-item small{
-    display:block;
-    font-family: var(--mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-top: 4px;
-    line-height: 1.3;
+  .eyebrow::before {
+    content: "";
+    width: 22px; height: 1px;
+    background: var(--clay);
+    display: inline-block;
   }
 
-  /* ---------- Publicaciones ---------- */
-  .scholar-banner{
-    display:flex;
-    align-items:center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    background: var(--bg-panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 20px 26px;
-    margin-bottom: 34px;
-  }
-  .scholar-banner .figure{
-    font-family: var(--serif);
-    font-weight: 700;
-    font-size: 1.6rem;
-    color: var(--primary-dark);
-  }
-  .scholar-banner .figure small{
-    display:block;
-    font-family: var(--mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    font-weight:400;
-    margin-top: 2px;
-  }
-  .pub-list{ display:flex; flex-direction:column; }
-  .pub-item{
-    display:grid;
-    grid-template-columns: 96px 1fr;
-    gap: 24px;
-    padding: 22px 0;
-    border-top: 1px solid var(--line-soft);
-  }
-  .pub-item:first-child{ border-top:none; }
-  .pub-year{
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    color: var(--accent);
-    letter-spacing: 0.04em;
-  }
-  .pub-item p{
-    margin: 0 0 8px;
-    color: var(--ink);
-    font-size: 0.94rem;
-    line-height: 1.55;
-  }
-  .pub-item .venue{
-    font-style: italic;
-    color: var(--ink-soft);
-  }
-  .pub-item a{
-    font-family: var(--mono);
-    font-size: 0.74rem;
-    color: var(--secondary);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  /* ---------- Cursos Udemy ---------- */
-  .udemy-banner{
-    display:flex;
-    align-items:center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 22px;
-    background: var(--bg-panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 22px 26px;
-    margin-bottom: 34px;
-  }
-  .udemy-stats{
-    display:flex;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .udemy-stats div span{
-    display:block;
-    font-family: var(--serif);
-    font-weight:700;
-    font-size: 1.3rem;
-    color: var(--primary-dark);
-  }
-  .udemy-stats div small{
-    display:block;
-    font-family: var(--mono);
-    font-size: 0.62rem;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    color: var(--ink-soft);
-    margin-top:2px;
-  }
-  .icon-udemy{ width:15px; height:15px; flex:none; opacity:0.75; }
-
-  .course-list{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-  }
-  .course-card{
-    display:flex;
-    flex-direction:column;
-    gap: 10px;
-    text-decoration:none;
-    color: var(--ink);
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 24px 22px;
-    transition: border-color .15s ease, transform .15s ease;
-  }
-  .course-card:hover{ border-color: var(--secondary); transform: translateY(-3px); }
-  .course-card:hover .course-link{ color: var(--secondary); }
-  .course-tag{
-    font-family: var(--mono);
-    font-size: 0.64rem;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    color: var(--accent);
-  }
-  .course-card h3{
-    font-family: var(--serif);
-    font-weight:600;
-    font-size: 1.08rem;
-    margin:0;
-    line-height:1.32;
-  }
-  .course-card p{
-    font-size: 0.86rem;
-    color: var(--ink-soft);
-    margin:0;
-    flex-grow:1;
-  }
-  .course-link{
-    font-family: var(--mono);
-    font-size: 0.74rem;
-    color: var(--ink-soft);
-    margin-top: 4px;
-    transition: color .15s ease;
-  }
-
-  /* ---------- Capacidades ---------- */
-  .cap-grid{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 26px;
-  }
-  .cap-card{
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 0 0 26px;
-    position:relative;
-    overflow: hidden;
-    transition: border-color .15s ease, transform .15s ease;
-  }
-  .cap-card:hover{ border-color: var(--primary); transform: translateY(-3px); }
-  .cap-figure{
-    position: relative;
+  /* ---------- Header ---------- */
+  .header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(237, 240, 234, 0.82);
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line);
-    background: var(--bg-panel);
   }
-  .cap-figure img{
-    width: 100%;
-    height: 170px;
-    object-fit: cover;
-    display:block;
+  .header-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; max-width: 1080px; margin: 0 auto;
   }
-  .cap-card .cap-body{ padding: 24px 26px 0; }
-  .cap-card .tag{
-    font-family: var(--mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--secondary);
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .mark { width: 30px; height: 30px; flex: none; }
+  .brand .mark circle, .brand .mark path { fill: none; stroke: var(--pine); stroke-width: 2; }
+  .brand b { font-family: var(--font-display); font-weight: 700; font-size: 1.02rem; letter-spacing: -0.01em; line-height: 1; }
+  .brand small { display: block; font-family: var(--font-mono); font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 3px; }
+
+  nav.menu { display: flex; gap: 26px; }
+  nav.menu a { font-size: 0.82rem; font-weight: 500; color: var(--muted); position: relative; }
+  nav.menu a:hover { color: var(--pine); }
+
+  main { position: relative; z-index: 1; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 96px 0 72px; position: relative; }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 5.4vw, 4.1rem);
+    font-weight: 700; line-height: 1.05; letter-spacing: -0.03em;
+    margin: 0 0 28px; color: var(--ink); max-width: 15ch;
   }
-  .cap-card h3{
-    font-family: var(--serif);
-    font-size: 1.22rem;
-    font-weight: 600;
-    margin: 12px 0 10px;
+  .hero h1 em { font-style: normal; color: var(--pine); }
+  .hero-desc { font-size: 1.14rem; color: var(--muted); max-width: 560px; margin: 0 0 38px; }
+  .btn-group { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 24px; font-weight: 600; font-size: 0.92rem;
+    font-family: var(--font-display);
+    border-radius: var(--radius); cursor: pointer; border: 1.5px solid transparent;
   }
-  .cap-card .question{
-    font-style: italic;
-    color: var(--primary-dark);
-    font-size: 0.92rem;
-    margin: 0 0 12px;
+  .btn-primary { background: var(--pine); color: #fff; }
+  .btn-primary:hover { background: var(--pine-deep); transform: translateY(-2px); }
+  .btn-outline { background: transparent; border-color: var(--line); color: var(--ink); }
+  .btn-outline:hover { border-color: var(--pine); color: var(--pine); }
+
+  /* Coordenadas flotantes del hero */
+  .hero-coords {
+    font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted);
+    margin-top: 56px; display: flex; gap: 28px; flex-wrap: wrap;
+    padding-top: 22px; border-top: 1px dashed var(--line);
   }
-  .cap-card p{ font-size: 0.92rem; color: var(--ink-soft); margin:0; }
+  .hero-coords b { color: var(--pine-deep); font-weight: 600; }
+
+  /* ---------- Secciones ---------- */
+  section { padding: 78px 0; position: relative; }
+  h2.title {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 3.4vw, 2.3rem);
+    font-weight: 600; color: var(--ink); margin: 0 0 20px; letter-spacing: -0.02em; line-height: 1.15;
+  }
+  .subtitle { font-size: 1.06rem; color: var(--muted); max-width: 680px; margin-bottom: 46px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 52px; align-items: center; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+
+  p { margin: 0 0 18px; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Sobre mí ---------- */
+  .about-figure { position: relative; }
+  .about-img {
+    width: 100%; height: 420px; object-fit: cover;
+    border-radius: var(--radius); position: relative; z-index: 1;
+    filter: saturate(1.02);
+  }
+  .about-figure::before {
+    content: ""; position: absolute; top: 16px; left: 16px; right: -16px; bottom: -16px;
+    border: 1.5px solid var(--pine); border-radius: var(--radius); z-index: 0;
+  }
+  .about-figure figcaption {
+    font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted);
+    margin-top: 24px; letter-spacing: 0.04em;
+  }
+  .stats-strip { display: flex; gap: 28px; margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--line); }
+  .stat span { font-family: var(--font-display); display: block; font-size: 1.9rem; font-weight: 700; color: var(--pine); line-height: 1.1; }
+  .stat small { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); }
+
+  /* ---------- Experiencia ---------- */
+  .job-card {
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-left: 3px solid var(--pine);
+    border-radius: var(--radius); padding: 40px;
+  }
+  .job-card h3 { font-family: var(--font-display); font-size: 1.32rem; color: var(--ink); margin: 0 0 6px; font-weight: 600; }
+  .job-sub { font-family: var(--font-mono); font-size: 0.86rem; color: var(--pine); margin: 0 0 24px; }
+  .job-card ul { color: var(--muted); padding-left: 0; list-style: none; margin: 22px 0 0; }
+  .job-card li { margin-bottom: 12px; padding-left: 26px; position: relative; }
+  .job-card li::before {
+    content: ""; position: absolute; left: 0; top: 11px;
+    width: 12px; height: 1.5px; background: var(--clay);
+  }
+  .scholar-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 26px; color: var(--pine); font-weight: 600; font-family: var(--font-display); font-size: 0.92rem; }
+  .scholar-link:hover { color: var(--clay); }
+
+  /* ---------- En qué trabajo ---------- */
+  .cap {
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 30px 28px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    display: flex; flex-direction: column; height: 100%;
+  }
+  .cap:hover { transform: translateY(-4px); border-color: var(--pine); }
+  .cap .ico { width: 42px; height: 42px; margin-bottom: 20px; }
+  .cap .ico path, .cap .ico circle, .cap .ico line, .cap .ico polyline { fill: none; stroke: var(--pine); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .cap h3 { font-family: var(--font-display); font-size: 1.12rem; margin: 0 0 10px; color: var(--ink); font-weight: 600; }
+  .cap p { font-size: 0.95rem; color: var(--muted); margin: 0; }
+  .cap-fig {
+    margin: 24px 0 0; border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; background: var(--paper);
+  }
+  .cap-fig img { width: 100%; height: 158px; object-fit: cover; object-position: center; display: block; }
+  .cap-fig figcaption {
+    font-family: var(--font-mono); font-size: 0.63rem; color: var(--muted);
+    padding: 8px 12px; border-top: 1px solid var(--line); letter-spacing: 0.03em;
+  }
+
+  /* ---------- Habilidades (estilo leyenda/tabla) ---------- */
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; }
+  .skill {
+    display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start;
+    padding: 22px 0; border-top: 1px solid var(--line);
+  }
+  .skill .swatch { width: 12px; height: 12px; margin-top: 6px; flex: none; border: 1.5px solid var(--pine); background: var(--pine-tint); }
+  .skill:nth-child(3n+2) .swatch { background: var(--clay-soft); border-color: var(--clay); }
+  .skill h3 { font-family: var(--font-display); font-size: 1.02rem; font-weight: 600; color: var(--ink); margin: 0 0 4px; }
+  .skill p { font-size: 0.9rem; color: var(--muted); margin: 0; }
+
+  /* ---------- Investigación ---------- */
+  .research { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .paper {
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 32px; display: flex; flex-direction: column;
+  }
+  .paper .flag { font-family: var(--font-mono); font-size: 0.68rem; color: var(--clay); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+  .paper h3 { font-family: var(--font-display); font-size: 1.28rem; color: var(--ink); margin: 0 0 14px; font-weight: 600; line-height: 1.25; }
+  .paper p { font-size: 0.96rem; color: var(--muted); }
+  .paper .cite { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--muted); }
+  .paper .cite a { color: var(--pine); font-weight: 600; }
+  .paper .cite a:hover { color: var(--clay); }
+
+  .yt-callout {
+    margin-top: 42px; display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+    background: var(--pine-deep); color: #eaf2ec;
+    border-radius: var(--radius); padding: 34px 38px;
+    position: relative; overflow: hidden;
+  }
+  .yt-callout .yt-logo { width: 56px; height: 40px; flex: none; }
+  .yt-callout .yt-txt { flex: 1; min-width: 240px; }
+  .yt-callout h3 { font-family: var(--font-display); margin: 0 0 6px; font-size: 1.2rem; color: #fff; font-weight: 600; }
+  .yt-callout p { margin: 0; color: #b9ccbf; font-size: 0.95rem; }
+  .btn-yt { background: #fff; color: var(--pine-deep); }
+  .btn-yt:hover { background: var(--clay-soft); transform: translateY(-2px); }
 
   /* ---------- Herramientas ---------- */
-  .tools-grid{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
+  .tools-box {
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 48px; text-align: center;
   }
-  .tool-card{
-    border-left: 3px solid var(--accent);
-    padding: 6px 0 6px 20px;
-  }
-  .tool-card h4{
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    margin: 0 0 8px;
-    color: var(--ink);
-    letter-spacing: 0.02em;
-  }
-  .tool-card p{ font-size: 0.88rem; color: var(--ink-soft); margin:0; }
-  .principles-note{
-    margin-top: 36px;
-    font-family: var(--mono);
-    font-size: 0.82rem;
-    color: var(--ink-soft);
-    border-top: 1px dashed var(--line);
-    padding-top: 22px;
+  .tool-tag {
+    display: inline-block; background: var(--paper); border: 1px solid var(--line);
+    padding: 8px 16px; border-radius: 30px; font-family: var(--font-mono);
+    font-size: 0.82rem; margin: 5px; color: var(--ink);
   }
 
-  /* ---------- Proyectos ---------- */
-  .project{
-    display:grid;
-    grid-template-columns: 220px 1fr;
-    gap: 34px;
-    padding: 30px 0;
-    border-top: 1px solid var(--line-soft);
-  }
-  .project:first-child{ border-top:none; padding-top:0; }
-  .project-meta{ display:flex; flex-direction:column; gap:6px; }
-  .project-meta .role{
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .project h3{
-    font-family: var(--serif);
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin: 0;
-  }
-  .project h3 a{
-    color: inherit;
-    text-decoration: none;
-    border-bottom: 1px solid var(--line);
-    transition: color .15s ease, border-color .15s ease;
-  }
-  .project h3 a:hover{ color: var(--secondary); border-color: var(--secondary); }
-  .project p{ color: var(--ink-soft); margin: 10px 0 0; max-width: 66ch; font-size: 0.96rem; }
+  /* ---------- Cursos ---------- */
+  .course-card { background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 28px; display: flex; flex-direction: column; height: 100%; }
+  .course-card .platform { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; color: var(--clay); letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 500; }
+  .course-card h3 { font-family: var(--font-display); font-size: 1.1rem; margin: 0 0 12px; color: var(--ink); font-weight: 600; line-height: 1.3; }
+  .course-card p { font-size: 0.92rem; color: var(--muted); margin-bottom: 24px; }
+  .course-card .btn { margin-top: auto; width: 100%; }
 
-  /* ---------- Formación ---------- */
-  .formacion-grid{
-    display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 40px;
+  /* ---------- Barra de métricas + CTA (Udemy / Scholar) ---------- */
+  .metric-bar {
+    margin-top: 30px; display: flex; align-items: center; justify-content: space-between;
+    gap: 28px; flex-wrap: wrap;
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 24px 34px;
   }
-  .formacion-item{
-    display:flex;
-    gap: 14px;
-    padding: 16px 0;
-    border-top: 1px solid var(--line-soft);
-  }
-  .formacion-item:nth-child(-n+2){ border-top: none; }
-  .formacion-item .dot{
-    width: 8px; height:8px; border-radius:50%;
-    background: var(--secondary);
-    margin-top: 7px;
-    flex: none;
-  }
-  .formacion-item p{ margin:0; font-size: 0.94rem; color: var(--ink-soft); }
-  .formacion-item b{ color: var(--ink); font-weight:600; }
+  .metric-nums { display: flex; gap: 44px; flex-wrap: wrap; }
+  .metric span { font-family: var(--font-display); display: block; font-size: 1.85rem; font-weight: 700; color: var(--pine); line-height: 1.1; }
+  .metric span .star { color: var(--clay); }
+  .metric small { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
+  .btn-solid { background: var(--pine-deep); color: #fff; box-shadow: 5px 5px 0 var(--clay); }
+  .btn-solid:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--clay); }
 
-  /* ---------- Colaborar ---------- */
-  .collab-steps{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 26px;
-    margin-bottom: 50px;
+  /* ---------- Lista de publicaciones ---------- */
+  .pubs { margin-top: 40px; }
+  .pub {
+    display: grid; grid-template-columns: 58px 1fr; gap: 22px;
+    padding: 24px 0; border-top: 1px solid var(--line);
   }
-  .collab-step{
-    background: var(--bg-panel);
-    border-radius: var(--radius);
-    padding: 26px 24px;
-    border-top: 3px solid var(--primary);
+  .pub:last-child { border-bottom: 1px solid var(--line); }
+  .pub .year { font-family: var(--font-mono); font-size: 0.82rem; color: var(--pine); font-weight: 500; padding-top: 3px; }
+  .pub .ref { font-size: 0.98rem; color: var(--muted); line-height: 1.6; }
+  .pub .ref strong { color: var(--ink); font-weight: 600; }
+  .pub .ref em { font-style: italic; }
+  .pub .doi {
+    display: inline-block; margin-top: 10px; font-family: var(--font-mono);
+    font-size: 0.76rem; color: var(--clay); text-decoration: underline; text-underline-offset: 3px; word-break: break-word;
   }
-  .collab-step .num{
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--secondary);
-    letter-spacing: 0.08em;
-  }
-  .collab-step h4{
-    font-family: var(--serif);
-    font-size: 1.08rem;
-    margin: 10px 0 8px;
-  }
-  .collab-step p{ font-size: 0.9rem; color: var(--ink-soft); margin:0; }
+  .pub .doi:hover { color: var(--pine); }
 
-  .capacitacion-box{
-    background: var(--primary-dark);
-    color: #f3efe2;
-    border-radius: var(--radius);
-    padding: 38px 36px;
-    display:grid;
-    grid-template-columns: 160px 1fr;
-    gap: 32px;
-    align-items:center;
+  /* ---------- Contacto (sutil) ---------- */
+  .contact { text-align: center; }
+  .contact h2 { margin-bottom: 16px; }
+  .contact p { color: var(--muted); max-width: 520px; margin: 0 auto 34px; font-size: 1.06rem; }
+  .contact-links { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .clink {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 12px 22px; border: 1.5px solid var(--line); border-radius: var(--radius);
+    font-family: var(--font-display); font-weight: 600; font-size: 0.9rem; color: var(--ink);
   }
-  .capacitacion-box .thumb{
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    overflow:hidden;
-    border: 2px solid var(--secondary);
-  }
-  .capacitacion-box .thumb img{
-    width:100%; height:100%; object-fit:cover;
-    filter: saturate(0.95);
-  }
-  .capacitacion-box h3{
-    font-family: var(--serif);
-    font-size: 1.35rem;
-    margin: 0 0 14px;
-  }
-  .capacitacion-box p{ color: #d8dfd3; max-width: 62ch; margin: 0 0 20px; }
-  .capacitacion-box a{
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    color: #f3efe2;
-    text-decoration: underline;
-    text-underline-offset: 4px;
+  .clink:hover { border-color: var(--pine); color: var(--pine); transform: translateY(-2px); }
+  .clink svg { width: 17px; height: 17px; }
+
+  footer {
+    text-align: center; padding: 44px 0 40px; color: var(--muted); font-size: 0.85rem;
+    font-family: var(--font-mono); border-top: 1px solid var(--line); position: relative; z-index: 1;
   }
 
-  /* ---------- Contacto ---------- */
-  .contact{
-    background: var(--bg-panel);
-    border-radius: var(--radius);
-    padding: 56px 48px;
-    text-align:center;
-  }
-  .contact .eyebrow{ text-align:center; }
-  .contact h2{
-    font-family: var(--serif);
-    font-weight: 600;
-    font-size: clamp(1.7rem, 4vw, 2.5rem);
-    margin: 0 0 18px;
-  }
-  .contact p{ color: var(--ink-soft); max-width: 52ch; margin: 0 auto 32px; }
-  .contact-links{
-    display:flex;
-    justify-content:center;
-    gap: 16px;
-    flex-wrap: wrap;
+  /* Animación de entrada, discreta */
+  .fade { opacity: 0; transform: translateY(14px); animation: rise 0.7s ease forwards; }
+  .fade.d1 { animation-delay: 0.08s; }
+  .fade.d2 { animation-delay: 0.16s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade { animation: none; opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
+    .btn:hover, .cap:hover, .clink:hover, .btn-yt:hover, .btn-solid:hover { transform: none; }
   }
 
-  footer{
-    padding: 30px 0 50px;
-    text-align:center;
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--ink-soft);
-    letter-spacing: 0.04em;
-  }
-
-  /* ---------- Responsive ---------- */
-  @media (max-width: 880px){
-    .about-grid, .cap-grid, .tools-grid, .formacion-grid, .collab-steps, .course-list{
-      grid-template-columns: 1fr;
-    }
-    .capacitacion-box{ grid-template-columns: 1fr; text-align:center; }
-    .capacitacion-box .thumb{ width: 120px; margin: 0 auto; }
-    .project{ grid-template-columns: 1fr; gap: 10px; }
-    .hero-stats{ grid-template-columns: repeat(3,1fr); gap: 16px; }
-    .pub-item{ grid-template-columns: 1fr; gap: 6px; }
-    .scholar-banner{ flex-direction: column; align-items: flex-start; }
-    .udemy-banner{ flex-direction: column; align-items: flex-start; }
-  }
-  @media (max-width: 720px){
-    nav.toc{
-      display:none;
-      position: absolute;
-      top: 62px; left:0; right:0;
-      background: var(--bg);
-      border-bottom: 1px solid var(--line);
-      flex-direction: column;
-      gap: 0;
-      padding: 10px 32px 18px;
-    }
-    nav.toc.open{ display:flex; }
-    nav.toc a{ padding: 10px 0; border-bottom: 1px solid var(--line-soft); }
-    .toc-toggle{ display:inline-block; }
-    .contact{ padding: 40px 22px; }
+  @media (max-width: 820px) {
+    .grid-2, .grid-3, .research, .skills-grid { grid-template-columns: 1fr; }
+    .pub { grid-template-columns: 1fr; gap: 6px; }
+    nav.menu { display: none; }
+    .grid-2 { gap: 40px; }
+    .about-figure::before { right: 12px; }
+    .job-card, .tools-box { padding: 30px; }
+    section { padding: 60px 0; }
+    .about-img { height: 340px; }
   }
 </style>
 </head>
 <body>
 
-<svg class="contours" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-  <g fill="none" stroke="#3e6e8e" stroke-width="1">
-    <path d="M -50 120 C 200 60, 400 180, 650 100 S 1100 40, 1250 140" opacity="0.25"/>
-    <path d="M -50 180 C 220 130, 420 250, 660 170 S 1080 110, 1250 210" opacity="0.2"/>
-    <path d="M -50 240 C 240 200, 440 320, 670 240 S 1060 180, 1250 280" opacity="0.15"/>
-  </g>
-  <g fill="none" stroke="#b5541f" stroke-width="1">
-    <path d="M -50 700 C 180 760, 420 640, 640 720 S 1000 800, 1250 720" opacity="0.18"/>
-    <path d="M -50 760 C 200 820, 440 700, 660 780 S 1020 860, 1250 780" opacity="0.14"/>
-  </g>
-  <g fill="none" stroke="#2f5233" stroke-width="1">
-    <path d="M -50 500 C 150 460, 300 560, 500 500 S 850 440, 1250 520" opacity="0.12"/>
-  </g>
+<!-- Curvas de nivel de fondo -->
+<svg class="contours" viewBox="0 0 1200 1700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <path d="M-40 160 C 220 90, 420 250, 640 180 S 1020 90, 1240 210"/>
+  <path d="M-40 250 C 220 180, 420 340, 640 270 S 1020 180, 1240 300"/>
+  <path d="M-40 360 C 240 300, 440 450, 660 380 S 1040 300, 1240 410"/>
+  <path d="M-40 520 C 260 470, 460 600, 680 540 S 1060 470, 1240 560"/>
+  <path d="M-40 700 C 260 660, 470 770, 700 720 S 1070 650, 1240 740"/>
+  <path d="M-40 900 C 280 860, 480 960, 720 910 S 1080 850, 1240 930"/>
+  <path d="M-40 1100 C 280 1060, 500 1150, 740 1110 S 1090 1050, 1240 1130"/>
+  <path d="M-40 1300 C 300 1270, 520 1350, 760 1310 S 1110 1260, 1240 1330"/>
+  <path d="M-40 1500 C 300 1470, 520 1540, 760 1510 S 1110 1460, 1240 1520"/>
+  <!-- pico anidado -->
+  <path d="M820 940 C 900 900, 1000 940, 1010 1010 C 1020 1080, 940 1120, 860 1090 C 800 1068, 780 990, 820 940 Z"/>
+  <path d="M845 970 C 905 942, 975 972, 982 1018 C 989 1064, 935 1092, 878 1072 C 838 1058, 820 1002, 845 970 Z"/>
+  <path d="M870 998 C 910 982, 952 1000, 956 1028 C 960 1056, 928 1072, 896 1060 C 872 1051, 858 1018, 870 998 Z"/>
+  <!-- valle anidado (izquierda) -->
+  <path d="M120 380 C 210 350, 320 400, 320 480 C 320 560, 210 600, 130 560 C 70 530, 60 420, 120 380 Z"/>
+  <path d="M150 415 C 220 392, 296 430, 296 486 C 296 542, 214 572, 156 542 C 112 520, 106 448, 150 415 Z"/>
 </svg>
 
-<div class="topbar">
-  <div class="topbar-inner">
-    <a href="#top" class="brand">
-      <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="20" cy="20" r="18" fill="none" stroke="#3e6e8e" stroke-width="1.4" opacity="0.55"/>
-        <circle cx="20" cy="20" r="12.5" fill="none" stroke="#b5541f" stroke-width="1.4" opacity="0.7"/>
-        <path d="M20 6 L20 14 M20 26 L20 34 M6 20 L14 20 M26 20 L34 20" stroke="#2f5233" stroke-width="1.6" stroke-linecap="round"/>
-        <circle cx="20" cy="20" r="3.4" fill="#2f5233"/>
+<header class="header">
+  <div class="header-inner">
+    <a href="#top" class="brand" aria-label="Fabio Castro-Llanos, inicio">
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="16"/>
+        <path d="M6 22 C 12 18, 16 26, 20 22 S 28 16, 34 20"/>
+        <path d="M9 28 C 14 25, 18 31, 22 28 S 29 23, 33 26"/>
       </svg>
-      <span>Fabio Castro<small>geofabio · datos espaciales</small></span>
+      <span><b>Fabio Castro-Llanos</b><small>ANALISTA SIG · GEÓGRAFO</small></span>
     </a>
-    <button class="toc-toggle" id="tocToggle" aria-label="Abrir índice">Índice ▾</button>
-    <nav class="toc" id="tocNav">
+    <nav class="menu">
       <a href="#sobre-mi">Sobre mí</a>
+      <a href="#habilidades">Habilidades</a>
+      <a href="#trabajo">En qué trabajo</a>
       <a href="#publicaciones">Publicaciones</a>
-      <a href="#capacidades">Capacidades</a>
-      <a href="#herramientas">Herramientas</a>
-      <a href="#proyectos">Proyectos</a>
-      <a href="#formacion">Formación</a>
       <a href="#cursos">Cursos</a>
-      <a href="#colaborar">Colaboremos</a>
       <a href="#contacto">Contacto</a>
     </nav>
   </div>
-</div>
+</header>
 
-<main id="top">
+<main class="wrap" id="top">
 
-  <!-- HERO -->
-  <div class="hero wrap">
-    <span class="coord-tag">03°27'N, 76°31'O — Cali, Colombia</span>
-    <h1>Transformo datos climáticos complejos en <em>decisiones territoriales</em> reales.</h1>
-    <p class="hero-sub">Geógrafo y científico de datos espaciales. Aplico modelos de distribución espacial, cartografía y estadística para la agricultura, el agua y la conservación frente al cambio climático — con código abierto, reproducible y documentado.</p>
-    <div class="hero-cta">
-      <a class="btn btn-primary" href="#contacto">Hablemos de tu proyecto</a>
-      <a class="btn btn-ghost" href="#proyectos">Ver proyectos</a>
+  <section class="hero">
+    <p class="eyebrow fade">03°26′ N · 76°31′ W — Cali, Colombia · remoto</p>
+    <h1 class="fade d1">Leo el <em>territorio y el clima</em> en los datos.</h1>
+    <p class="hero-desc fade d1">
+      Soy Fabio, geógrafo y analista de datos espaciales con maestría en SIG. Trabajo con grandes volúmenes de datos espaciales y tabulares, registros climáticos y modelos para entender cómo se configuran las regiones y cuál es el nicho climático de las especies, el agua y los ecosistemas que hoy damos por sentados.
+    </p>
+    <div class="btn-group fade d2">
+      <a href="#investigacion" class="btn btn-primary">Ver mi trabajo</a>
+      <a href="#contacto" class="btn btn-outline">Escríbeme</a>
     </div>
-    <div class="hero-stats">
-      <div><span>10+</span><small>Años con Big-Data climático</small></div>
-      <div><span>2</span><small>Grados · UNIVALLE / Salzburgo</small></div>
-      <div><span>R · Py</span><small>Flujos geoespaciales reproducibles</small></div>
+    <div class="hero-coords fade d2">
+      <span><b>10+</b> años en datos espaciales</span>
+      <span><b>MaxEnt · R · Python</b> caja de herramientas</span>
+      <span><b>Andes tropicales</b> mi terreno</span>
     </div>
-  </div>
+  </section>
 
-  <!-- SOBRE MÍ -->
   <section id="sobre-mi">
-    <div class="wrap">
-      <span class="eyebrow">Perfil</span>
-      <h2 class="section-title">Sobre mí</h2>
-      <div class="about-grid">
-        <div>
-          <p>Geógrafo con Maestría en Ciencias de Sistemas de Información Geográfica. Mi carrera se ha centrado en resolver una necesidad crítica: ¿cómo transformar la información geográfica en una herramienta de acción climática real para los territorios?</p>
-          <p>Como Asociado de Investigación Senior en un centro de investigación agrícola, he estructurado análisis metodológicos rigurosos junto a equipos multidisciplinarios: modelos de cambio y variabilidad climática, índices de sequía e inundación, análisis de deforestación y lineamientos técnicos para cadenas de valor sostenibles como el café y el cacao.</p>
-          <p>Basado en Cali, Colombia — disponible para proyectos internacionales y colaboraciones remotas.</p>
+    <div class="grid-2">
+      <div>
+        <p class="eyebrow">Quién soy</p>
+        <h2 class="title">Un geógrafo al que le gusta compartir conocimiento mediante videotutoriales</h2>
+        <p>
+          Estudié Geografía en la Universidad del Valle y después una maestría en Ciencias de la Información Geográfica en la Universidad de Salzburgo. Desde hace más de diez años trabajo en un centro de investigación agrícola, armando modelos de clima y cultivos junto a equipos de disciplinas muy distintas.
+        </p>
+        <p>
+          Con el tiempo descubrí que lo que más disfruto es compartir lo que aprendo. Grabo videotutoriales, dicto cursos y me gusta explicar —sin tanto tecnicismo— por qué un raster o un modelo de distribución de especies no son tan complicados como parecen.
+        </p>
+        <p>
+          Detrás de todo hay una idea que me mueve: que la ciencia no se quede en el PDF, sino que sirva para tomar mejores decisiones sobre el territorio.
+        </p>
+        <div class="stats-strip">
+          <div class="stat"><span>10+</span><small>años de experiencia</small></div>
+          <div class="stat"><span>6.5k+</span><small>alumnos y suscriptores</small></div>
         </div>
+      </div>
+      <figure class="about-figure" style="margin:0">
+        <img src="images/fabio-perfil.jpg" alt="Fabio Castro-Llanos" class="about-img">
+        <figcaption>// Cali, Valle del Cauca — 995 m s. n. m.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="habilidades">
+    <p class="eyebrow">Habilidades</p>
+    <h2 class="title">Lo que traigo a la mesa</h2>
+    <p class="subtitle">De la estadística al mapa: el conjunto de herramientas con el que abordo un problema espacial.</p>
+    <div class="skills-grid">
+      <div class="skill">
+        <span class="swatch" aria-hidden="true"></span>
         <div>
-          <figure class="profile-photo">
-            <img src="images/fabio-perfil.jpg" alt="Fabio Castro frente a un mapa físico de Suramérica">
-            <figcaption>Fabio Castro — Cali, Colombia</figcaption>
-          </figure>
-          <div class="credential-card">
-            <h3>Formación</h3>
-            <ul>
-              <li><b>MSc, Ciencias de la Información Geográfica</b><span>Universidad de Salzburgo — Austria</span></li>
-              <li><b>Geógrafo</b><span>Universidad del Valle — Colombia</span></li>
-            </ul>
-            <div class="highlight-strip">
-              <a class="highlight-item" href="https://scholar.google.com/citations?user=lfGOw-MAAAAJ&hl=en" target="_blank" rel="noopener">
-                <span>500+</span>
-                <small>Citas · Google Scholar</small>
-              </a>
-              <div class="highlight-item">
-                <span>10+2</span>
-                <small>Años exp. · R / Py</small>
-              </div>
-              <a class="highlight-item" href="https://www.youtube.com/fabiocastrollanos" target="_blank" rel="noopener">
-                <span>6.5k+</span>
-                <small>Subs · Un Geógrafo, YouTube</small>
-              </a>
-            </div>
-          </div>
+          <h3>Análisis de datos y estadística aplicada</h3>
+          <p>Estadística descriptiva, inferencia, pruebas de hipótesis y modelado para decisiones basadas en datos.</p>
+        </div>
+      </div>
+      <div class="skill">
+        <span class="swatch" aria-hidden="true"></span>
+        <div>
+          <h3>Fundamentos de geomática</h3>
+          <p>Sistemas de información geográfica (SIG) y cartografía temática avanzada.</p>
+        </div>
+      </div>
+      <div class="skill">
+        <span class="swatch" aria-hidden="true"></span>
+        <div>
+          <h3>Modelado ecológico y de cultivos</h3>
+          <p>Modelos de distribución de especies (SDM) con Random Forest, SVM y Máxima Entropía.</p>
+        </div>
+      </div>
+      <div class="skill">
+        <span class="swatch" aria-hidden="true"></span>
+        <div>
+          <h3>Análisis climático</h3>
+          <p>Downscaling, índices climáticos extremos y variabilidad y cambio climático.</p>
+        </div>
+      </div>
+      <div class="skill">
+        <span class="swatch" aria-hidden="true"></span>
+        <div>
+          <h3>Estadística espacial avanzada</h3>
+          <p>Autocorrelación espacial (Moran / LISA), Regresión Geográficamente Ponderada (GWR) y Kernel Density Estimation.</p>
+        </div>
+      </div>
+      <div class="skill">
+        <span class="swatch" aria-hidden="true"></span>
+        <div>
+          <h3>Análisis territorial</h3>
+          <p>Métricas del paisaje, interpolación espacial (kriging, cokriging, IDW) y monitoreo de coberturas y deforestación.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- PUBLICACIONES -->
+  <section id="trabajo">
+    <p class="eyebrow">En qué trabajo</p>
+    <h2 class="title">Tres cosas que hago bien</h2>
+    <p class="subtitle">Todo lo armo en código abierto y documentado, para que cualquier análisis se pueda abrir, revisar y volver a correr.</p>
+    <div class="grid-3">
+      <div class="cap">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M4 40 C 12 30, 18 34, 24 24 S 36 8, 44 14"/>
+          <path d="M4 40 L 44 40"/>
+          <path d="M24 24 L 24 40"/><path d="M14 31 L 14 40"/><path d="M34 18 L 34 40"/>
+        </svg>
+        <h3>Aptitud agroclimática</h3>
+        <p>Modelo qué tan apto es un territorio para un cultivo, hoy y bajo escenarios de clima futuro. Es como preguntarle al mapa dónde y cuándo va a funcionar una siembra.</p>
+        <figure class="cap-fig" style="margin-top:auto;">
+          <img src="images/agroclima.png" alt="Mapas de idoneidad del bosque seco tropical en Colombia para hoy, 2030 y 2050" loading="lazy">
+          <figcaption>// Idoneidad del bosque seco · Colombia · presente–2050</figcaption>
+        </figure>
+      </div>
+      <div class="cap">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="10" cy="12" r="4"/><circle cx="10" cy="36" r="4"/><circle cx="38" cy="24" r="4"/>
+          <path d="M14 12 H 28 C 32 12, 34 24, 34 24"/>
+          <path d="M14 36 H 28 C 32 36, 34 24, 34 24"/>
+        </svg>
+        <h3>Geoprocesamiento y automatización</h3>
+        <p>Convierto pilas de rasters, vectores y datos de clima en flujos ordenados y repetibles, escritos en código para que nadie tenga que confiar a ciegas.</p>
+        <figure class="cap-fig" style="margin-top:auto;">
+          <img src="images/Geoprocesamiento.png" alt="Mapa de densidad de cultivos de coca en áreas protegidas y zonas de amortiguamiento en Perú" loading="lazy">
+          <figcaption>// Coca en áreas protegidas · Perú · 2016–2020</figcaption>
+        </figure>
+      </div>
+      <div class="cap">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M6 14 L 18 8 L 30 14 L 42 8 L 42 34 L 30 40 L 18 34 L 6 40 Z"/>
+          <path d="M18 8 L 18 34"/><path d="M30 14 L 30 40"/>
+        </svg>
+        <h3>Mapas y visualización</h3>
+        <p>Traduzco resultados complejos en mapas, tableros y reportes que se entienden sin necesidad de ser experto en SIG.</p>
+        <figure class="cap-fig" style="margin-top:auto;">
+          <img src="images/Divulgacion.png" alt="Mapas de idoneidad climática en Norteamérica bajo escenarios SSP para distintos periodos" loading="lazy">
+          <figcaption>// Idoneidad climática · escenarios SSP · Norteamérica</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="investigacion">
+    <p class="eyebrow">Investigación</p>
+    <h2 class="title">Dos estudios, un mismo patrón: la vida se va montaña arriba</h2>
+    <p class="subtitle">Buena parte de lo que hago termina en artículos revisados por pares. En estos dos, con equipos distintos, apareció lo mismo: a medida que sube la temperatura, tanto los cultivos como las especies silvestres tienen que buscar terreno más alto para sobrevivir.</p>
+
+    <div class="research">
+      <article class="paper">
+        <span class="flag">Primer autor</span>
+        <h3>El arroz sube de altura en Colombia</h3>
+        <p>
+          Mapeamos dónde se puede cultivar arroz de riego hoy y hacia el 2050 bajo un escenario de clima severo (RCP 8.5), usando modelos de nicho con MaxEnt y 32 modelos climáticos globales. El resultado: el área apta podría reducirse cerca de un <strong>60%</strong> —de 4,4 a 1,8 millones de hectáreas—.
+        </p>
+        <p>
+          Las tierras bajas serían las más golpeadas, mientras que valles de media altura como el alto Cauca y el Patía ganarían aptitud. A diferencia de los países templados, que mueven sus cultivos hacia latitudes más frías, en el trópico el arroz no tiene esa salida: le toca subir de elevación.
+        </p>
+        <p class="cite">
+          Castro-Llanos, Hyman, Rubiano, Ramirez-Villegas &amp; Achicanoy (2019) · <em>Mitigation and Adaptation Strategies for Global Change</em><br>
+          <a href="https://doi.org/10.1007/s11027-019-09852-x" target="_blank" rel="noopener">Leer el artículo →</a>
+        </p>
+      </article>
+
+      <article class="paper">
+        <span class="flag">Coautor</span>
+        <h3>Refugios para las orquídeas del bosque seco</h3>
+        <p>
+          Con un equipo estudiamos 12 orquídeas típicas del bosque seco tropical colombiano y modelamos su hábitat hacia el 2030 y el 2050. Vimos cómo su zona apta se desplaza desde las tierras bajas (0–1000 m) hacia la media montaña (1300–1700 m), y se reduce de forma drástica.
+        </p>
+        <p>
+          A partir de eso propusimos <strong>69 "nichos bioclimáticos"</strong> repartidos por el país: áreas que funcionan como refugio térmico y como corredores para que la flora y la fauna migren. Una estrategia concreta de conservación frente al cambio climático.
+        </p>
+        <p class="cite">
+          Reina-Rodríguez, Rubiano, Castro-Llanos &amp; Soriano (2017) · <em>Lankesteriana</em><br>
+          <a href="https://doi.org/10.15517/lank.v17i1.27999" target="_blank" rel="noopener">Leer el artículo →</a>
+        </p>
+      </article>
+    </div>
+
+    <div class="yt-callout">
+      <svg class="yt-logo" viewBox="0 0 72 50" aria-hidden="true">
+        <rect x="1" y="1" width="70" height="48" rx="12" fill="#ff3b30"/>
+        <path d="M29 15 L 50 25 L 29 35 Z" fill="#fff"/>
+      </svg>
+      <div class="yt-txt">
+        <h3>¿Prefieres verlo en acción?</h3>
+        <p>En mi canal <strong style="color:#fff">Un Geógrafo</strong> comparto tutoriales de R aplicado a SIG, manejo de rasters, análisis de similaridad y modelos ecológicos, paso a paso.</p>
+      </div>
+      <a href="https://www.youtube.com/@UnGeografo" target="_blank" rel="noopener" class="btn btn-yt">▶ Ver el canal</a>
+    </div>
+  </section>
+
   <section id="publicaciones">
-    <div class="wrap">
-      <span class="eyebrow">Producción académica</span>
-      <h2 class="section-title">Publicaciones científicas</h2>
-      <p class="section-intro">Investigación revisada por pares sobre cambio climático, cultivos, biodiversidad y uso del suelo — publicada en revistas indexadas y disponible en detalle en mi perfil de Google Scholar.</p>
+    <p class="eyebrow">Producción académica</p>
+    <h2 class="title">Publicaciones científicas</h2>
+    <p class="subtitle">Investigación revisada por pares sobre cambio climático, cultivos, biodiversidad y uso del suelo, publicada en revistas indexadas y disponible en detalle en mi perfil de Google Scholar.</p>
 
-      <div class="scholar-banner">
-        <div class="figure">500+<small>Citas acumuladas</small></div>
-        <a class="btn btn-primary" href="https://scholar.google.com/citations?user=lfGOw-MAAAAJ&hl=en" target="_blank" rel="noopener">Ver perfil en Google Scholar →</a>
+    <div class="metric-bar">
+      <div class="metric-nums">
+        <div class="metric"><span>500+</span><small>Citas acumuladas</small></div>
       </div>
+      <a href="https://scholar.google.com/citations?user=lfGOw-MAAAAJ&hl=en" target="_blank" rel="noopener" class="btn btn-solid">Ver perfil en Google Scholar →</a>
+    </div>
 
-      <div class="pub-list">
-        <div class="pub-item">
-          <span class="pub-year">2019</span>
-          <div>
-            <p>Castro-Llanos, F., Hyman, G., Rubiano, J. et al. <b>Climate change favors rice production at higher elevations in Colombia.</b> <span class="venue">Mitigation and Adaptation Strategies for Global Change, 24, 1401–1430.</span></p>
-            <a href="https://doi.org/10.1007/s11027-019-09852-x" target="_blank" rel="noopener">doi.org/10.1007/s11027-019-09852-x</a>
-          </div>
+    <div class="pubs">
+      <div class="pub">
+        <div class="year">2025</div>
+        <div class="ref">
+          Gómez-Llano, J. H., Nava, D. E., Castro-Llanos, F., &amp; Acevedo, F. E. <strong>Pest and host associations that transcend time: assessing the impact of climate change on grape berry moth (<em>Paralobesia viteana</em>) and its hosts <em>Vitis riparia</em> and <em>Vitis labrusca</em> in North America.</strong> <em>Ecology and Evolution, 15(12), e72612.</em>
+          <a class="doi" href="https://doi.org/10.1002/ece3.72612" target="_blank" rel="noopener">doi.org/10.1002/ece3.72612</a>
         </div>
-        <div class="pub-item">
-          <span class="pub-year">2017</span>
-          <div>
-            <p>Reina-Rodríguez, G. A., Rubiano Mejía, J. E., Castro-Llanos, F. A., & Soriano, I. <b>Orchid Distribution and Bioclimatic Niches as a Strategy to Climate Change in Areas of Tropical Dry Forest in Colombia.</b> <span class="venue">Lankesteriana, 17(1), 17–47.</span></p>
-            <a href="https://dx.doi.org/10.15517/lank.v17i1.27999" target="_blank" rel="noopener">dx.doi.org/10.15517/lank.v17i1.27999</a>
-          </div>
+      </div>
+      <div class="pub">
+        <div class="year">2025</div>
+        <div class="ref">
+          Manrique, H., Castro-Llanos, F., van Rompaey, A., &amp; Honnay, O. <strong>Coca cultivation and deforestation in the Peruvian Amazon: a multiscale analysis using spatial regression models.</strong> <em>Applied Geography, 184, 103742.</em>
+          <a class="doi" href="https://doi.org/10.1016/j.apgeog.2025.103742" target="_blank" rel="noopener">doi.org/10.1016/j.apgeog.2025.103742</a>
         </div>
-        <div class="pub-item">
-          <span class="pub-year">2025</span>
-          <div>
-            <p>Gómez-Llano, J. H., Nava, D. E., Castro-Llanos, F., & Acevedo, F. E. <b>Pest and Host Associations That Transcend Time: Assessing the Impact of Climate Change on Grape Berry Moth (Paralobesia viteana) and Its Hosts Vitis riparia and Vitis labrusca in North America.</b> <span class="venue">Ecology and Evolution, 15(12), e72612.</span></p>
-            <a href="https://doi.org/10.1002/ece3.72612" target="_blank" rel="noopener">doi.org/10.1002/ece3.72612</a>
-          </div>
+      </div>
+      <div class="pub">
+        <div class="year">2023</div>
+        <div class="ref">
+          Schmidt, P. G., Castro-Llanos, F., Gutierrez, N., &amp; Bunn, C. <strong>ACLIMATAR: climate adaptation planning tool for cocoa, coffee and tea farming.</strong> <em>Plataforma web.</em>
+          <a class="doi" href="https://adaptation.aclimatar.org" target="_blank" rel="noopener">adaptation.aclimatar.org</a>
         </div>
-        <div class="pub-item">
-          <span class="pub-year">2025</span>
-          <div>
-            <p>Manrique, H., Castro-Llanos, F., van Rompaey, A., & Honnay, O. <b>Coca cultivation and deforestation in the Peruvian Amazon: A multiscale analysis using spatial regression models.</b> <span class="venue">Applied Geography, 184, 103742.</span></p>
-            <a href="https://doi.org/10.1016/j.apgeog.2025.103742" target="_blank" rel="noopener">doi.org/10.1016/j.apgeog.2025.103742</a>
-          </div>
+      </div>
+      <div class="pub">
+        <div class="year">2019</div>
+        <div class="ref">
+          Castro-Llanos, F., Hyman, G., Rubiano, J. et al. <strong>Climate change favors rice production at higher elevations in Colombia.</strong> <em>Mitigation and Adaptation Strategies for Global Change, 24, 1401–1430.</em>
+          <a class="doi" href="https://doi.org/10.1007/s11027-019-09852-x" target="_blank" rel="noopener">doi.org/10.1007/s11027-019-09852-x</a>
         </div>
-        <div class="pub-item">
-          <span class="pub-year">2023</span>
-          <div>
-            <p>Schmidt, P. G., Castro-Llanos, F., Gutierrez, N., & Bunn, C. <b>ACLIMATAR: Climate adaptation planning tool for cocoa, coffee and tea farming.</b> <span class="venue">Plataforma web.</span></p>
-            <a href="https://adaptation.aclimatar.org/" target="_blank" rel="noopener">adaptation.aclimatar.org</a>
-          </div>
+      </div>
+      <div class="pub">
+        <div class="year">2017</div>
+        <div class="ref">
+          Reina-Rodríguez, G. A., Rubiano Mejía, J. E., Castro-Llanos, F. A., &amp; Soriano, I. <strong>Orchid distribution and bioclimatic niches as a strategy to climate change in areas of tropical dry forest in Colombia.</strong> <em>Lankesteriana, 17(1), 17–47.</em>
+          <a class="doi" href="https://doi.org/10.15517/lank.v17i1.27999" target="_blank" rel="noopener">dx.doi.org/10.15517/lank.v17i1.27999</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CAPACIDADES -->
-  <section id="capacidades">
-    <div class="wrap">
-      <span class="eyebrow">Qué resuelvo</span>
-      <h2 class="section-title">Capacidades clave</h2>
-      <p class="section-intro">Flujos de trabajo que combinan rigor científico y transparencia técnica: scripts reproducibles y basados en literatura científica, que tu equipo puede validar, ejecutar y escalar de forma independiente.</p>
-      <div class="cap-grid">
-        <div class="cap-card">
-          <div class="cap-figure">
-            <img src="images/agroclima.png" alt="Mapa de idoneidad de bosque seco tropical para especies de orquídeas en Colombia, presente y proyecciones a 2030 y 2050">
-          </div>
-          <div class="cap-body">
-            <span class="tag">Agroclima</span>
-            <h3>Análisis agroclimático y aptitud de tierras</h3>
-            <p class="question">¿Dónde y cuándo son viables los cultivos bajo el cambio climático?</p>
-            <p>Modelado de idoneidad biofísica y escenarios futuros. Procesamiento de series de tiempo de alta resolución y análisis decadales para cultivos clave como el café y el cacao, incluyendo el nicho climático futuro de especies de flora y fauna.</p>
-          </div>
-        </div>
-        <div class="cap-card">
-          <div class="cap-figure">
-            <img src="images/Geoprocesamiento.png" alt="Mapa de densidad de cultivos en áreas protegidas y zonas de amortiguamiento">
-          </div>
-          <div class="cap-body">
-            <span class="tag">Geoprocesamiento</span>
-            <h3>Modelado geoespacial y tuberías de datos</h3>
-            <p class="question">¿Cómo convertir datos masivos en conocimiento reproducible para no expertos?</p>
-            <p>Flujos automatizados para el procesamiento de rasters y vectores, integrando datos socioeconómicos, ambientales, climáticos, de suelo y terreno. Programación aplicada a variables climáticas, interpolaciones y dinámicas territoriales.</p>
-          </div>
-        </div>
-        <div class="cap-card">
-          <div class="cap-figure">
-            <img src="images/Divulgacion.png" alt="Mapas de idoneidad de hábitat actual y proyectada bajo distintos escenarios de cambio climático">
-          </div>
-          <div class="cap-body">
-            <span class="tag">Divulgación</span>
-            <h3>Visualización de datos y divulgación científica</h3>
-            <p class="question">¿Cómo comunicar la ciencia espacial de forma ejecutiva?</p>
-            <p>Mapas interactivos, dashboards, aplicaciones web y documentación técnica clara — conectando la academia con la comunidad general a través de contenido especializado.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HERRAMIENTAS -->
   <section id="herramientas">
-    <div class="wrap">
-      <span class="eyebrow">Cómo trabajo</span>
-      <h2 class="section-title">Herramientas y reproducción de código</h2>
-      <p class="section-intro">Todo el código se construye bajo principios de ciencia abierta y reproducibilidad, siguiendo estándares académicos consecuentes.</p>
-      <div class="tools-grid">
-        <div class="tool-card">
-          <h4>R / RStudio / Positron</h4>
-          <p>Uso intensivo del ecosistema geoespacial — terra, sf, leaflet, ggplot2 — para la manipulación avanzada de datos raster y vectoriales.</p>
-        </div>
-        <div class="tool-card">
-          <h4>Python</h4>
-          <p>Scripts robustos con rasterio, geopandas y matplotlib, según el caso de uso.</p>
-        </div>
-        <div class="tool-card">
-          <h4>ArcGIS / QGIS</h4>
-          <p>Amplias opciones para el diseño de cartografía temática cuando el proyecto lo requiere.</p>
-        </div>
-      </div>
-      <p class="principles-note">→ entregables: capas, mapas, visualizaciones, reportes técnicos y scripts fuente comentados en R para garantizar autonomía total del equipo.</p>
-    </div>
-  </section>
-
-  <!-- PROYECTOS -->
-  <section id="proyectos">
-    <div class="wrap">
-      <span class="eyebrow">Trabajo destacado</span>
-      <h2 class="section-title">Proyectos y contribuciones</h2>
-
-      <div class="project">
-        <div class="project-meta">
-          <span class="role">Co-autor · Metodología</span>
-          <h3>Aclimatar<br>(Coffee + Cocoa)</h3>
-        </div>
-        <p>Colaboración estrecha con equipos de investigación global e interdisciplinaria para el procesamiento de datos climático-espaciales de la plataforma Aclimatar, diseñada para apoyar la adaptación climática de pequeños agricultores de cacao, café y té. Desarrollo de modelos de machine learning (Random Forest) para identificar zonas idóneas de cultivo, y técnicas de desescalado climático (downscaling) para optimizar la resolución espacial de los modelos de cambio climático.</p>
-      </div>
-
-      <div class="project">
-        <div class="project-meta">
-          <span class="role">Analista de datos climáticos</span>
-          <h3>ClimaLoca</h3>
-        </div>
-        <p>Participación activa en el proyecto regional ClimaLoca: modelamiento espacial para evaluar el impacto de estreses climáticos en zonas productoras de cacao de la región andina. El trabajo mapeó la vulnerabilidad de los sistemas de producción cacaotera y modeló la idoneidad futura de los cultivos, como insumo técnico para estrategias regionales de mitigación y adaptación.</p>
-      </div>
-
-      <div class="project">
-        <div class="project-meta">
-          <span class="role">Creador de contenido</span>
-          <h3><a href="https://www.youtube.com/fabiocastrollanos" target="_blank" rel="noopener">Un Geógrafo en YouTube</a></h3>
-        </div>
-        <p>Espacio de divulgación y educación donde comparto metodologías y tutoriales de programación en R aplicados a la geografía y ciencias afines, promoviendo la democratización del conocimiento geoespacial.</p>
+    <div class="tools-box">
+      <p class="eyebrow" style="justify-content:center; display:flex;">Ciencia abierta</p>
+      <h2 class="title" style="margin-bottom:16px;">Con qué construyo</h2>
+      <p style="max-width:560px; margin:0 auto 30px; color:var(--muted);">
+        Creo en la reproducibilidad. Escribo código limpio y documentado para que cualquier proyecto se pueda validar, actualizar y extender más adelante.
+      </p>
+      <div>
+        <span class="tool-tag">R / RStudio</span>
+        <span class="tool-tag">QGIS</span>
+        <span class="tool-tag">ArcGIS Pro</span>
+        <span class="tool-tag">SDM</span>
+        <span class="tool-tag">Machine Learning</span>
+        <span class="tool-tag">caret models</span>
       </div>
     </div>
   </section>
 
-  <!-- FORMACIÓN Y CAPACITACIÓN -->
-  <section id="formacion">
-    <div class="wrap">
-      <span class="eyebrow">Enseño lo que aplico</span>
-      <h2 class="section-title">Capacitación especializada</h2>
-      <p class="section-intro">Mentorías privadas, tutorías personalizadas y cursos en Udemy para fortalecer las capacidades técnico-investigativas de personas y equipos, cubriendo un portafolio de temáticas de vanguardia en ciencias de datos espaciales.</p>
-      <div class="formacion-grid">
-        <div class="formacion-item"><span class="dot"></span><p><b>Análisis de datos y estadística aplicada</b> — descriptiva, inferencia, pruebas de hipótesis y modelado para decisiones basadas en datos.</p></div>
-        <div class="formacion-item"><span class="dot"></span><p><b>Fundamentos de geomática</b> — sistemas de información geográfica (SIG) y cartografía temática avanzada.</p></div>
-        <div class="formacion-item"><span class="dot"></span><p><b>Modelado ecológico y de cultivos</b> — modelos de distribución de especies (SDM) con Random Forest, SVM y Máxima Entropía.</p></div>
-        <div class="formacion-item"><span class="dot"></span><p><b>Análisis climático</b> — downscaling, índices climáticos extremos y variabilidad/cambio climático.</p></div>
-        <div class="formacion-item"><span class="dot"></span><p><b>Estadística espacial avanzada</b> — autocorrelación espacial (Moran-LISA), Regresión Geográficamente Ponderada (GWR), Kernel Density Estimation.</p></div>
-        <div class="formacion-item"><span class="dot"></span><p><b>Análisis territorial</b> — métricas del paisaje, interpolación espacial (kriging, cokriging, IDW) y monitoreo de coberturas/deforestación.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CURSOS EN UDEMY -->
   <section id="cursos">
-    <div class="wrap">
-      <span class="eyebrow">Formación en línea</span>
-      <h2 class="section-title">Cursos en Udemy</h2>
-      <p class="section-intro">Tres cursos en español sobre R aplicado a sistemas de información geográfica, análisis climático y modelado de especies — pensados para quienes parten desde cero.</p>
-
-      <div class="udemy-banner">
-        <div class="udemy-stats">
-          <div><span>1000+</span><small>Estudiantes</small></div>
-          <div><span>250+</span><small>Reseñas</small></div>
-          <div><span>4.5 ★</span><small>Calificación</small></div>
-        </div>
-        <a class="btn btn-primary" href="https://www.udemy.com/user/fabio-alexander-castro-llanos/" target="_blank" rel="noopener">
-          <svg class="icon-udemy" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M8 7.5v6.3a4 4 0 0 0 8 0V7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-          Ver perfil en Udemy →
-        </a>
+    <p class="eyebrow">Docencia</p>
+    <h2 class="title">Mis cursos en Udemy</h2>
+    <p class="subtitle">Me gusta compartir lo que sé. Estos cursos son para quien quiera aprender SIG, R y análisis espacial a su ritmo. Ya somos más de mil estudiantes.</p>
+    <div class="grid-3">
+      <div class="course-card">
+        <span class="platform">Udemy</span>
+        <h3>Introducción a los SIG con R — de 0 a 100</h3>
+        <p>Desde cero: manipular datos espaciales (vectores y rasters), calcular distancias, hacer mapas profesionales y automatizar procesos geográficos en R.</p>
+        <a href="https://www.udemy.com/course/introduccion-a-los-sig-con-r/" target="_blank" rel="noopener" class="btn btn-outline">Ver el curso</a>
       </div>
-
-      <div class="course-list">
-        <a class="course-card" href="https://www.udemy.com/course/introduccion-a-los-sig-con-r/" target="_blank" rel="noopener">
-          <span class="course-tag">R · SIG</span>
-          <h3>Introducción a los SIG con R</h3>
-          <p>Fundamentos de R aplicados al manejo, análisis y visualización de información espacial, desde cero.</p>
-          <span class="course-link">Ver curso →</span>
-        </a>
-        <a class="course-card" href="https://www.udemy.com/course/analisis-de-datos-climaticos-con-r/" target="_blank" rel="noopener">
-          <span class="course-tag">R · Clima</span>
-          <h3>Análisis de datos climáticos con R</h3>
-          <p>Descarga, procesamiento y análisis espacial de datos climáticos históricos y de proyecciones futuras.</p>
-          <span class="course-link">Ver curso →</span>
-        </a>
-        <a class="course-card" href="https://www.udemy.com/course/analisis-espacial-modelos-de-distribucion-de-especies-en-r/" target="_blank" rel="noopener">
-          <span class="course-tag">R · SDM</span>
-          <h3>Análisis espacial · Modelos de Distribución de Especies en R</h3>
-          <p>Modelado de nichos climáticos de flora y fauna con Random Forest, MaxEnt y otros algoritmos.</p>
-          <span class="course-link">Ver curso →</span>
-        </a>
+      <div class="course-card">
+        <span class="platform">Udemy</span>
+        <h3>Modelos de Distribución de Especies (SDM) en R</h3>
+        <p>Técnicas para predecir la distribución potencial de especies y evaluar la aptitud de cultivos frente a distintos escenarios de cambio climático.</p>
+        <a href="#" target="_blank" rel="noopener" class="btn btn-outline">Ver el curso</a>
       </div>
+      <div class="course-card">
+        <span class="platform">Udemy</span>
+        <h3>Análisis de datos espaciales y geoprocesamiento</h3>
+        <p>Estadística espacial, índices, modelos SAR y manejo avanzado de datos raster para tomar mejores decisiones ecológicas.</p>
+        <a href="#" target="_blank" rel="noopener" class="btn btn-outline">Ver el curso</a>
+      </div>
+    </div>
+
+    <div class="metric-bar">
+      <div class="metric-nums">
+        <div class="metric"><span>1000+</span><small>Estudiantes</small></div>
+        <div class="metric"><span>250+</span><small>Reseñas</small></div>
+        <div class="metric"><span>4.5 <span class="star">★</span></span><small>Calificación</small></div>
+      </div>
+      <a href="#" target="_blank" rel="noopener" class="btn btn-solid">Ver perfil en Udemy →</a>
     </div>
   </section>
 
-  <!-- CÓMO COLABORAR -->
-  <section id="colaborar">
-    <div class="wrap">
-      <span class="eyebrow">Trabajemos juntos</span>
-      <h2 class="section-title">¿Cómo podemos colaborar?</h2>
-      <p class="section-intro">Asesoría personalizada, de la definición del alcance a la entrega final.</p>
-      <div class="collab-steps">
-        <div class="collab-step">
-          <span class="num">01 — Alcance</span>
-          <h4>Definición de alcance</h4>
-          <p>Conversamos sobre los objetivos de tu investigación o proyecto, los datos geoespaciales o climáticos disponibles y la viabilidad técnica.</p>
-        </div>
-        <div class="collab-step">
-          <span class="num">02 — Propuesta</span>
-          <h4>Propuesta técnico-económica</h4>
-          <p>Plan de trabajo detallado con entregables claros, metodologías sugeridas y cronograma.</p>
-        </div>
-        <div class="collab-step">
-          <span class="num">03 — Entrega</span>
-          <h4>Desarrollo y entrega</h4>
-          <p>Recibes capas, mapas, visualizaciones, reportes técnicos y scripts fuente comentados en R — y, si se acuerda, videos explicando el código y la estructura de carpetas.</p>
-        </div>
-      </div>
-
-      <div class="capacitacion-box">
-        <div class="thumb">
-          <img src="images/fabio-perfil.jpg" alt="Fabio Castro">
-        </div>
-        <div>
-          <h3>¿Buscas formación estructurada para ti o tu equipo?</h3>
-          <p>Ofrezco mentorías privadas, tutorías personalizadas y acceso a mis cursos en Udemy — cubriendo desde estadística espacial avanzada hasta modelado ecológico y análisis climático.</p>
-          <a href="mailto:fabioalexandercastro@gmail.com?subject=Consulta%20sobre%20formaci%C3%B3n%20y%20mentor%C3%ADas&body=Hola%20Fabio%2C%0D%0A%0D%0AMe%20gustar%C3%ADa%20recibir%20informaci%C3%B3n%20sobre%20tus%20mentor%C3%ADas%2C%20tutor%C3%ADas%20o%20cursos.%0D%0A%0D%0AGracias.">Consultar disponibilidad →</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACTO -->
-  <section id="contacto">
-    <div class="wrap">
-      <div class="contact">
-        <span class="eyebrow">03°27'N, 76°31'O</span>
-        <h2>Hablemos de tu proyecto</h2>
-        <p>Cuéntame sobre tus objetivos, tus datos y tu territorio — te respondo con la viabilidad técnica y los próximos pasos.</p>
-        <div class="contact-links">
-          <a class="btn btn-primary" href="mailto:fabioalexandercastro@gmail.com">✉ fabioalexandercastro@gmail.com</a>
-          <a class="btn btn-ghost" href="https://wa.me/573217850490" target="_blank" rel="noopener">
-            <svg class="icon-whatsapp" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <circle cx="16" cy="16" r="16" fill="#25D366"/>
-              <path fill="#fff" d="M16 6.7c-5.24 0-9.5 4.26-9.5 9.5 0 1.68.44 3.31 1.28 4.75L6.5 25.5l4.72-1.24a9.46 9.46 0 0 0 4.77 1.28h.01c5.24 0 9.5-4.26 9.5-9.5s-4.25-9.34-9.5-9.34Zm0 17.38h-.01a7.86 7.86 0 0 1-4.01-1.1l-.29-.17-2.98.78.8-2.9-.19-.3a7.83 7.83 0 0 1-1.21-4.19c0-4.34 3.54-7.87 7.9-7.87 2.11 0 4.09.83 5.58 2.32a7.84 7.84 0 0 1 2.31 5.56c0 4.35-3.54 7.87-7.9 7.87Zm4.32-5.89c-.24-.12-1.41-.7-1.63-.78-.22-.08-.38-.12-.53.12-.16.24-.61.78-.75.94-.14.16-.27.18-.5.06-.24-.12-1.01-.37-1.92-1.19-.71-.63-1.19-1.4-1.33-1.64-.14-.24-.01-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.53-1.29-.73-1.76-.19-.46-.39-.4-.53-.4-.14-.01-.29-.01-.45-.01a.86.86 0 0 0-.63.3c-.22.24-.84.82-.84 2.01s.86 2.34.98 2.5c.12.16 1.71 2.62 4.16 3.67.58.25 1.03.4 1.39.51.58.19 1.11.16 1.53.1.47-.07 1.41-.58 1.61-1.14.2-.55.2-1.03.14-1.13-.06-.1-.22-.16-.46-.28Z"/>
-            </svg>
-            WhatsApp +57 321 785 0490
-          </a>
-        </div>
-      </div>
+  <section id="contacto" class="contact">
+    <p class="eyebrow" style="justify-content:center; display:flex;">Contacto</p>
+    <h2 class="title">¿Conversamos?</h2>
+    <p>Si algo de lo que viste te resuena —una idea, una pregunta, una colaboración—, escríbeme. Siempre me gusta saber en qué anda la gente.</p>
+    <div class="contact-links">
+      <a href="mailto:fabioalexandercastro@gmail.com" class="clink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        Correo
+      </a>
+      <a href="https://wa.me/573217850490" target="_blank" rel="noopener" class="clink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-4-1L3 21l1.5-5.5A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+        WhatsApp
+      </a>
+      <a href="https://scholar.google.com/citations?user=lfGOw-MAAAAJ&hl=en" target="_blank" rel="noopener" class="clink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 1 9l11 6 9-4.9V17"/><path d="M5 12v5c0 1.5 3.1 3 7 3s7-1.5 7-3v-5"/></svg>
+        Scholar
+      </a>
     </div>
   </section>
 
 </main>
 
 <footer>
-  © <span id="year"></span> Fabio Castro — Un Geógrafo · Cali, Colombia
+  © <span id="year"></span> Fabio Castro-Llanos — Cali, Colombia · 03°26′ N 76°31′ W
 </footer>
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
-
-  // Mobile TOC toggle
-  const tocToggle = document.getElementById('tocToggle');
-  const tocNav = document.getElementById('tocNav');
-  tocToggle.addEventListener('click', () => {
-    tocNav.classList.toggle('open');
-  });
-  tocNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => tocNav.classList.remove('open')));
-
-  // Active section highlight in TOC
-  const sections = document.querySelectorAll('main section[id]');
-  const links = document.querySelectorAll('nav.toc a');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const link = document.querySelector(`nav.toc a[href="#${entry.target.id}"]`);
-      if (!link) return;
-      if (entry.isIntersecting){
-        links.forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
-      }
-    });
-  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
-  sections.forEach(s => observer.observe(s));
-
-  // Respect reduced motion
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.documentElement.style.scrollBehavior = 'auto';
-  }
 </script>
 
 </body>
