@@ -200,6 +200,16 @@
     overflow: hidden; background: var(--paper);
   }
   .cap-fig img { width: 100%; height: 158px; object-fit: cover; object-position: center; display: block; }
+  .cap-fig a { display: block; position: relative; overflow: hidden; }
+  .cap-fig a img { transition: transform 0.35s ease; }
+  .cap-fig a:hover img { transform: scale(1.05); }
+  .cap-fig a::after {
+    content: "Ver publicación ↗"; position: absolute; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(transparent, rgba(18, 53, 40, 0.88));
+    color: #fff; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.04em;
+    padding: 26px 12px 9px; opacity: 0; transition: opacity 0.25s ease;
+  }
+  .cap-fig a:hover::after, .cap-fig a:focus-visible::after { opacity: 1; }
   .cap-fig figcaption {
     font-family: var(--font-mono); font-size: 0.63rem; color: var(--muted);
     padding: 8px 12px; border-top: 1px solid var(--line); letter-spacing: 0.03em;
@@ -319,6 +329,7 @@
     .fade { animation: none; opacity: 1; transform: none; }
     html { scroll-behavior: auto; }
     .btn:hover, .cap:hover, .clink:hover, .btn-yt:hover, .btn-solid:hover { transform: none; }
+    .cap-fig a:hover img { transform: none; }
   }
 
   @media (max-width: 820px) {
@@ -482,10 +493,12 @@
           <path d="M4 40 L 44 40"/>
           <path d="M24 24 L 24 40"/><path d="M14 31 L 14 40"/><path d="M34 18 L 34 40"/>
         </svg>
-        <h3>Aptitud agroclimática</h3>
+        <h3>Aptitud climática</h3>
         <p>Modelo qué tan apto es un territorio para un cultivo, hoy y bajo escenarios de clima futuro. Es como preguntarle al mapa dónde y cuándo va a funcionar una siembra.</p>
         <figure class="cap-fig" style="margin-top:auto;">
-          <img src="images/agroclima.png" alt="Mapas de idoneidad del bosque seco tropical en Colombia para hoy, 2030 y 2050" loading="lazy">
+          <a href="https://www.scielo.sa.cr/scielo.php?pid=S1409-38712017000100017&amp;script=sci_abstract&amp;tlng=en" target="_blank" rel="noopener" title="Reina-Rodríguez et al. (2017) · Lankesteriana">
+            <img src="images/agroclima.png" alt="Mapas de idoneidad del bosque seco tropical en Colombia para hoy, 2030 y 2050" loading="lazy">
+          </a>
           <figcaption>// Idoneidad del bosque seco · Colombia · presente–2050</figcaption>
         </figure>
       </div>
@@ -498,7 +511,9 @@
         <h3>Geoprocesamiento y automatización</h3>
         <p>Convierto pilas de rasters, vectores y datos de clima en flujos ordenados y repetibles, escritos en código para que nadie tenga que confiar a ciegas.</p>
         <figure class="cap-fig" style="margin-top:auto;">
-          <img src="images/Geoprocesamiento.png" alt="Mapa de densidad de cultivos de coca en áreas protegidas y zonas de amortiguamiento en Perú" loading="lazy">
+          <a href="https://www.sciencedirect.com/science/article/abs/pii/S0143622825002371" target="_blank" rel="noopener" title="Manrique et al. (2025) · Applied Geography">
+            <img src="images/Geoprocesamiento.png" alt="Mapa de densidad de cultivos de coca en áreas protegidas y zonas de amortiguamiento en Perú" loading="lazy">
+          </a>
           <figcaption>// Coca en áreas protegidas · Perú · 2016–2020</figcaption>
         </figure>
       </div>
@@ -510,7 +525,9 @@
         <h3>Mapas y visualización</h3>
         <p>Traduzco resultados complejos en mapas, tableros y reportes que se entienden sin necesidad de ser experto en SIG.</p>
         <figure class="cap-fig" style="margin-top:auto;">
-          <img src="images/Divulgacion.png" alt="Mapas de idoneidad climática en Norteamérica bajo escenarios SSP para distintos periodos" loading="lazy">
+          <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/ece3.72612" target="_blank" rel="noopener" title="Gómez-Llano et al. (2025) · Ecology and Evolution">
+            <img src="images/Divulgacion.png" alt="Mapas de idoneidad climática en Norteamérica bajo escenarios SSP para distintos periodos" loading="lazy">
+          </a>
           <figcaption>// Idoneidad climática · escenarios SSP · Norteamérica</figcaption>
         </figure>
       </div>
@@ -563,7 +580,7 @@
         <h3>¿Prefieres verlo en acción?</h3>
         <p>En mi canal <strong style="color:#fff">Un Geógrafo</strong> comparto tutoriales de R aplicado a SIG, manejo de rasters, análisis de similaridad y modelos ecológicos, paso a paso.</p>
       </div>
-      <a href="https://www.youtube.com/@UnGeografo" target="_blank" rel="noopener" class="btn btn-yt">▶ Ver el canal</a>
+      <a href="https://www.youtube.com/@FabioCastroLlanos/videos" target="_blank" rel="noopener" class="btn btn-yt">▶ Ver el canal</a>
     </div>
   </section>
 
@@ -649,15 +666,15 @@
       </div>
       <div class="course-card">
         <span class="platform">Udemy</span>
-        <h3>Modelos de Distribución de Especies (SDM) en R</h3>
+        <h3>Análisis espacial: Modelos de Distribución de Especies (SDM) en R</h3>
         <p>Técnicas para predecir la distribución potencial de especies y evaluar la aptitud de cultivos frente a distintos escenarios de cambio climático.</p>
-        <a href="#" target="_blank" rel="noopener" class="btn btn-outline">Ver el curso</a>
+        <a href="https://www.udemy.com/course/analisis-espacial-modelos-de-distribucion-de-especies-en-r/" target="_blank" rel="noopener" class="btn btn-outline">Ver el curso</a>
       </div>
       <div class="course-card">
         <span class="platform">Udemy</span>
-        <h3>Análisis de datos espaciales y geoprocesamiento</h3>
-        <p>Estadística espacial, índices, modelos SAR y manejo avanzado de datos raster para tomar mejores decisiones ecológicas.</p>
-        <a href="#" target="_blank" rel="noopener" class="btn btn-outline">Ver el curso</a>
+        <h3>Análisis de datos climáticos con R</h3>
+        <p>Descarga, procesa y analiza series climáticas en R: anomalías, índices, tendencias y visualización de datos de temperatura y precipitación.</p>
+        <a href="https://www.udemy.com/course/analisis-de-datos-climaticos-con-r/" target="_blank" rel="noopener" class="btn btn-outline">Ver el curso</a>
       </div>
     </div>
 
@@ -667,7 +684,7 @@
         <div class="metric"><span>250+</span><small>Reseñas</small></div>
         <div class="metric"><span>4.5 <span class="star">★</span></span><small>Calificación</small></div>
       </div>
-      <a href="#" target="_blank" rel="noopener" class="btn btn-solid">Ver perfil en Udemy →</a>
+      <a href="https://www.udemy.com/user/fabio-alexander-castro-llanos/" target="_blank" rel="noopener" class="btn btn-solid">Ver perfil en Udemy →</a>
     </div>
   </section>
 
